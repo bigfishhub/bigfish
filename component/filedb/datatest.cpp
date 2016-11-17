@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <utils/Logger.h>
-#include <include/_define.h>
+#include <common/_define.h>
 #include "datadb.h"
 
 int main(int argc, char const *argv[])

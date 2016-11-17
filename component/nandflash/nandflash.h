@@ -1,7 +1,7 @@
 #ifndef __NANDFLASH_H__
 #define __NANDFLASH_H__
 
-#include "include/_define.h"
+#include "common/_define.h"
 #include "utils/Logger.h"
 
 #define NAND_BLOCK_STATUS_GOOD				0x0

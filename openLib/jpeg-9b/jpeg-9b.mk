@@ -38,7 +38,7 @@ LOCAL_REQUIRED_MODULES :=
 $(LOCAL_MODULE):$(LOCAL_REQUIRED_MODULES) $(LOCAL_PATH)/.$(LOCAL_MODULE)-install
 	@echo "====== copy libjpeg begin!"
 	@cp -d -rf $(PRIVATE_OPENSOURCE_INSTALL_DIR)/lib/libjpeg.so*  $(PRIVATE_TARGET_LD_SHARED_DIRS)
-	@cp $(PRIVATE_OPENSOURCE_INSTALL_DIR)/lib/libjpeg.a  $(PRIVATE_TARGET_LD_STATIC_DIRS)
+	#@cp $(PRIVATE_OPENSOURCE_INSTALL_DIR)/lib/libjpeg.a  $(PRIVATE_TARGET_LD_STATIC_DIRS)
 	@cp $(PRIVATE_OPENSOURCE_INSTALL_DIR)/include/*  $(OUTDIR)/include
 	@echo "====== copy libjpeg end!"
 

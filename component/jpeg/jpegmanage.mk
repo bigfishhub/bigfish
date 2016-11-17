@@ -5,7 +5,7 @@ include $(CLEAR_VARS)
 
 LOCAL_SRC_FILES := src/jpegmanage.cpp
 
-LOCAL_C_INCLUDES := $(BIGPIG_TOP)/base \
+LOCAL_C_INCLUDES := $(BIGPIG_TOP)/base/include \
 					$(LOCAL_PATH)/inc \
 					$(OUTDIR)/include
 
@@ -24,7 +24,7 @@ include $(CLEAR_VARS)
 
 LOCAL_SRC_FILES := test/main.cpp
 
-LOCAL_C_INCLUDES := $(BIGPIG_TOP)/base \
+LOCAL_C_INCLUDES := $(BIGPIG_TOP)/base/include \
 					$(LOCAL_PATH)/inc \
 					$(OUTDIR)/include
 

@@ -2,7 +2,7 @@
 #define __JPEGMANAGE_H__
 
 #include <stdio.h>
-#include "include/_define.h"
+#include "common/_define.h"
 #include "utils/Logger.h"
 
 #ifdef __cplusplus

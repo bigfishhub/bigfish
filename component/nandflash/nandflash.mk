@@ -5,7 +5,7 @@ include $(CLEAR_VARS)
 
 LOCAL_SRC_FILES := nandflash.cpp
 
-LOCAL_C_INCLUDES := $(BIGPIG_TOP)/base
+LOCAL_C_INCLUDES := $(BIGPIG_TOP)/base/include
 
 LOCAL_SHARED_LIBRARIES := 
 
@@ -22,7 +22,7 @@ include $(CLEAR_VARS)
 
 LOCAL_SRC_FILES := flashtest.cpp
 
-LOCAL_C_INCLUDES := $(BIGPIG_TOP)/base
+LOCAL_C_INCLUDES := $(BIGPIG_TOP)/base/include
 
 LOCAL_LDLIBS := -lpthread
 
