@@ -3,7 +3,8 @@ LOCAL_PATH:= $(call my-dir)
 
 include $(CLEAR_VARS)
 
-LOCAL_SRC_FILES := src/jpegmanage.cpp
+LOCAL_SRC_FILES := src/jpegmanage.cpp \
+                   src/bmpmanage.cpp
 
 LOCAL_C_INCLUDES := $(BIGPIG_TOP)/base/include \
 					$(LOCAL_PATH)/inc \
