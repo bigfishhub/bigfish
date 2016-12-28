@@ -5,6 +5,8 @@
 #include <stdlib.h>
 #include "nandflash.h"
 
+int unused __attribute__((unused));
+
 /*
 ** 0 擦除测试
 ** 1 2 3 4写入测试
@@ -111,7 +113,7 @@ _S32 main(_S32 argc, char const *argv[])
 
     while (1)
     {
-        scanf("%d",&i);
+        unused = scanf("%d",&i);
         if (i == 0)
         {
             for (k = 0;k <0x400000/flash->nand_get_block_size();k++)

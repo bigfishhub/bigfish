@@ -31,7 +31,7 @@ LOCAL_C_INCLUDES := $(BIGPIG_TOP)/base/include \
 
 LOCAL_LDLIBS := -lpthread
 
-LOCAL_SHARED_LIBRARIES := libjpegmanage
+LOCAL_SHARED_LIBRARIES := libjpegmanage libutils
 #LOCAL_STATIC_LIBRARIES := libnandflash
 
 LOCAL_MODULE:= jpegmanage_test

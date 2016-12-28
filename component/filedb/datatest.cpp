@@ -4,6 +4,8 @@
 #include <common/_define.h>
 #include "datadb.h"
 
+int unused __attribute__((unused));
+
 int main(int argc, char const *argv[])
 {
 	DATADB fileoperate;
@@ -19,7 +21,7 @@ int main(int argc, char const *argv[])
 	}
 	fileoperate.get_file((_CHAR*)"datatest.cpp", pfile, -1);
 	fileoperate.save_file((_CHAR*)"osd/tre.txt",pfile,fileLength);
-    scanf("n");
+    unused = scanf("n");
     fileoperate.delete_dir((_CHAR*)"osd");
 
 	return 0;

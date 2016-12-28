@@ -574,7 +574,7 @@ _S32 NANDflash::nand_read_page (_S32 flash_fd, _U32 page_address, _U8* data, _U3
     memcpy((_VOID *)data,(_VOID *)&page_buf[offset],size);
     if (page_buf != _NULL) free(page_buf);
 
-    LOGI("nand_read_page called, read num = %d\n", ret_value);
+    LOGI("nand_read_page called, read num = %ld\n", ret_value);
 
     return 0;
 }

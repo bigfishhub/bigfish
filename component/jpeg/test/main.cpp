@@ -5,6 +5,7 @@
 #include <sys/stat.h>
 #include <unistd.h>
 #include <fcntl.h>
+int unused __attribute__((unused));
 
 void helpshow()
 {
@@ -81,7 +82,7 @@ int main(int argc, char const *argv[])
             return -1;
         }
         memset(rgb_buffer,0x00,statConf.st_size);
-        read(fp,rgb_buffer,statConf.st_size);
+        unused = read(fp,rgb_buffer,statConf.st_size);
         close(fp);
         if (!strcmp(argv[1],"bgra2rgb"))
         {
@@ -97,7 +98,7 @@ int main(int argc, char const *argv[])
             LOGE("open file %s failed.\n", argv[3]);  
             return -1;  
         } 
-        write(fp,rgb_buffer,length);
+        unused = write(fp,rgb_buffer,length);
         close(fp);
         free(rgb_buffer);
     }
@@ -128,7 +129,7 @@ int main(int argc, char const *argv[])
             return -1;
         }
         memset(rgb_buffer,0x00,statConf.st_size);
-        read(fp,rgb_buffer,statConf.st_size);
+        unused = read(fp,rgb_buffer,statConf.st_size);
         close(fp);
         if (!strcmp(argv[1],"rgb2j"))
         {
