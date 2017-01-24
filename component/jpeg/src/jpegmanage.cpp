@@ -206,8 +206,8 @@ _S32 JPEGMANAGE::magnifyImage(_U8* rgb_buffer, _S32 width, _S32 height,
 	fromRowStride = width*3;
 	toRowStride   = towidth*3;
 
-	LOGD("Hrate:%lf,Wrate:%lf,fromRowStride:%lld,toRowStride:%lld\n", 
-		Hrate,Wrate,fromRowStride,toRowStride);
+	LOGD("Hrate:%lf,Wrate:%lf,fromRowStride:%ld,toRowStride:%ld\n", 
+		Hrate,Wrate,(long)fromRowStride,(long)toRowStride);
 
 	for (i = 0; i < toheight;i++)
 	{
@@ -224,7 +224,7 @@ _S32 JPEGMANAGE::magnifyImage(_U8* rgb_buffer, _S32 width, _S32 height,
 			dex = (_U64)(((_U64)line)*fromRowStride + ((_U64)column)*3);
 			if (dex >= fromRowStride*height)
             {
-                LOGE("i:%d,j:%d,dex:%lld\n",i,j,dex );
+                LOGE("i:%d,j:%d,dex:%ld\n",i,j,(long)dex );
                 return FAILURE;
             }
 			(*torgb_buffer)[i*toRowStride+j*3+0] = rgb_buffer[dex+0];

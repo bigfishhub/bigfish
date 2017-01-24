@@ -4,6 +4,8 @@ Q := @
 EXTRA_CLEAN_MODULES :=
 ALL_MODULES :=
 
+all:all_modules
+
 include $(BIGPIG_TOP)/build/config.mk
 include $(BIGPIG_TOP)/build/definitions.mk
 include $(BIGPIG_TOP)/build/module-list.mk

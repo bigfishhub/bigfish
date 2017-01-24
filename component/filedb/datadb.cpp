@@ -7,6 +7,7 @@
 #include <libgen.h>
 #include <sys/stat.h>
 #include <sys/types.h>
+#include <fcntl.h>
 #include <utils/Logger.h>
 #include <dirent.h>
 #include <errno.h>
@@ -255,3 +256,284 @@ _S32 DATADB::save_file(_CHAR *rel_path, _CHAR *data, _S64 length)
 
     return SUCCESS;
 }
+
+//-------------------------------------------------------------------
+
+#define BUFFER_SIZE 1024  
+/* 
+ * 判断是否是目录 
+ * @ 是目录返回1，是普通文件返回0，出错返回-1 
+ * */  
+_S32 DATADB::IsDir(const _CHAR *path)  
+{  
+    struct stat buf;  
+    if (stat(path, &buf)==-1)  
+    {  
+        LOGD("stat :%s",strerror(errno));  
+        LOGD("path = %s\n", path);  
+        return -1;  
+    }  
+    return S_ISDIR(buf.st_mode);  
+} 
+
+/* 
+ * 创建目录 
+ * @ 可以创建多级目录，失败返回-1 
+ * */  
+_S32 DATADB::CreateDir(const _CHAR *path)  
+{  
+    _CHAR pathname[256];  
+    strcpy(pathname, path);  
+    _S32 i, len = strlen(pathname);  
+    if (pathname[len-1]!='/')  
+    {  
+        strcat(pathname, "/");  
+        len++;  
+    }  
+    for (i=0; i<len; i++)  
+    {  
+        if (pathname[i]=='/')  
+        {  
+            if (i == 0)
+                continue;
+            pathname[i]=0;  
+            if (access(pathname, F_OK)) //判断路径是否存在  
+            {   //不存在则创建  
+                if (mkdir(pathname, 0755)==-1)  
+                {  
+                    LOGD("i:%d mkdir \"%s\":%s\n",i,pathname,strerror(errno));  
+                    return -1;  
+                }  
+            }  
+            pathname[i]='/';  
+        }  
+    }  
+    return 0;  
+}
+
+/* 
+ * 拷贝文件 
+ * @ @dstpath -- 可以是文件名也可以是目录名 
+ * */  
+_S32 DATADB::FileCopy(const _CHAR *srcpath, const _CHAR *dstpath)  
+{  
+    _S32 srcfd, dstfd, file_len, ret=1;  
+    _CHAR buffer[BUFFER_SIZE];  
+    _CHAR dstfn[256];  
+    if (access(srcpath, R_OK))  
+    {  
+        LOGD("Cannot copy does not exist or unreadable files: %s\n", srcpath);  
+        return -1;  
+    }  
+    strcpy(dstfn, dstpath);  
+    //如果@dstpath存在且是目录则在其后加上srcpath的文件名  
+    if (access(dstpath, F_OK) == 0 && IsDir(dstpath) == 1)  
+    {  
+        if (dstfn[strlen(dstfn)-1]!='/')  
+        {  
+            strcat(dstfn, "/");  
+        }  
+        if (strchr(srcpath, '/'))  
+        {  
+            strcat(dstfn, strrchr(srcpath, '/'));  
+        }  
+        else  
+        {  
+            strcat(dstfn, srcpath);  
+        }  
+    }  
+    srcfd = open(srcpath, O_RDONLY);  
+    struct stat stabuff;
+    if (0 == fstat(srcfd,&stabuff))
+    {
+        dstfd = open(dstfn, O_WRONLY|O_CREAT,stabuff.st_mode); 
+    }
+    else
+    {
+        dstfd = open(dstfn, O_WRONLY|O_CREAT,0755);  
+    }    
+    if (srcfd == -1 || dstfd == -1)  
+    {  
+        if (srcfd!=-1)  
+        {  
+            close(srcfd);  
+        }  
+        LOGD("open \"%s\":%s!\n",dstfn,strerror(errno));  
+        return -1;  
+    }  
+/*    {
+        struct stat stabuff;
+        if (0 == fstat(srcfd,&stabuff))
+        {
+            int flag = 0;
+            if ((flag = fcntl(dstfd,F_GETFL,0)) != -1)
+            {
+                flag |= stabuff.st_mode;
+                if (fcntl(dstfd,F_SETFL,flag) < 0)
+                {
+                    HI_LOGD("set fcntl error!");
+                }
+            }
+        }
+    }*/
+      
+    file_len = lseek(srcfd, 0L, SEEK_END);  
+    lseek(srcfd, 0L, SEEK_SET);  
+    while(ret)  
+    {  
+        ret = read(srcfd, buffer, BUFFER_SIZE);  
+        if (ret==-1)  
+        {  
+            LOGD("read fail!:%s\n",strerror(errno));  
+            close(srcfd);  
+            close(dstfd);  
+            return -1;  
+        }  
+        if(-1 == write(dstfd, buffer, ret))
+        {
+            LOGD("write fail!:%s\n",strerror(errno));  
+            close(srcfd);  
+            close(dstfd);  
+            return -1; 
+        }  
+        file_len -= ret;  
+        bzero(buffer, BUFFER_SIZE);  
+    }  
+    close(srcfd);  
+    close(dstfd);  
+    if (ret)  
+    {  
+        LOGD("文件: %s, 没有拷贝完!\n", srcpath);  
+        return -1;  
+    }  
+    return 0;  
+}
+
+/* 
+ * 目录拷贝 
+ * */  
+_S32 DATADB::DirCopy(const _CHAR *srcpath, const _CHAR *dstpath)  
+{  
+    _S32 ret;  
+    DIR * dir;  
+    struct dirent *ptr;  
+    _CHAR frompath[256];
+    _CHAR topath[256];  
+    if (!(ret = IsDir(srcpath))) //如果@srcpath 是文件，直接进行文件拷贝  
+    {  
+        FileCopy(srcpath, dstpath);  
+        return 0;  
+    }  
+    else if(ret!=1)  //目录或文件不存在  
+    {  
+        return -1;  
+    }  
+    dir = opendir(srcpath);  
+    CreateDir(dstpath);  
+    while((ptr=readdir(dir))!=NULL)  
+    {  
+        bzero(frompath, 256);  
+        bzero(topath, 256);  
+        strcpy(frompath, srcpath);  
+        strcpy(topath, dstpath);  
+        if (frompath[strlen(frompath)-1]!='/')  
+        {  
+            strcat(frompath, "/");  
+        }  
+        if (topath[strlen(topath)-1]!='/')  
+        {  
+            strcat(topath, "/");  
+        }  
+        strcat(frompath, ptr->d_name);  
+        //HI_LOGD("%s\n", frompath);  
+        strcat(topath, ptr->d_name);  
+        if ((ret=IsDir(frompath))==1)  
+        {  
+            if (strcmp(strrchr(frompath, '/'), "/.")==0  
+                || strcmp(strrchr(frompath, '/'), "/..")==0)  
+            {  
+                //HI_LOGD(". or ..目录不用复制\n");  
+            }  
+            else  
+            {  
+                DirCopy(frompath, topath);  
+            }  
+        }  
+        else if (ret!=-1)  
+        {  
+            FileCopy(frompath, topath);  
+        }  
+    }  
+    closedir(dir);  
+    return 0;  
+}  
+
+/* 
+ * 如果  oldFile 比 newFile 修改时间新，返回1，否则返回0
+ * 打开文件错误返回 -1;
+ * */ 
+_S32 DATADB::compareFileAmendTime(const _CHAR* oldFile ,const _CHAR *newFile)
+{
+    struct timespec oldFileTime;
+    struct timespec newFileTime;
+    struct stat stabuff;
+
+    if(0 != stat(oldFile,&stabuff))
+    {
+        LOGE("[compareFileAmendTime] stat \"%s\" fail!%s\n",oldFile,strerror(errno));
+        return -1;
+    }
+    oldFileTime = stabuff.st_mtim;
+    if(0 != stat(newFile,&stabuff))
+    {
+        LOGE("[compareFileAmendTime] stat \"%s\" fail!%s\n",oldFile,strerror(errno));
+        return -1;
+    }
+    newFileTime = stabuff.st_mtim;
+
+    LOGD("[compareFileAmendTime] \"%s\" sec %u nsec %u\n",oldFile,(int32_t)oldFileTime.tv_sec,(int32_t)oldFileTime.tv_nsec);
+    LOGD("[compareFileAmendTime] \"%s\" sec %u nsec %u\n",newFile,(int32_t)newFileTime.tv_sec,(int32_t)newFileTime.tv_nsec);
+    if (oldFileTime.tv_sec < newFileTime.tv_sec)
+    {
+        return 0;
+    }
+    else if (oldFileTime.tv_sec == newFileTime.tv_sec)
+    {
+        if (oldFileTime.tv_nsec < newFileTime.tv_sec)
+        {
+            return 0;
+        }
+    }
+
+    return 1;
+}
+
+_S32 DATADB::compareFileSize(const _CHAR* bigSizeFile ,const _CHAR *smallSizeFile)
+{
+    off_t bigFileSize;
+    off_t smallFileSize;
+    struct stat stabuff;
+
+    if(0 != stat(bigSizeFile,&stabuff))
+    {
+        LOGD("[compareFileSize] stat \"%s\" fail!%s\n",bigSizeFile,strerror(errno));
+        return -1;
+    }
+    bigFileSize = stabuff.st_size;
+    if(0 != stat(smallSizeFile,&stabuff))
+    {
+        LOGD("[compareFileSize] stat \"%s\" fail!%s\n",smallSizeFile,strerror(errno));
+        return -1;
+    }
+    smallFileSize = stabuff.st_size;
+
+    LOGD("[compareFileSize] \"%s\" off_t %u\n",bigSizeFile,(int32_t)bigFileSize);
+    LOGD("[compareFileSize] \"%s\" off_t %u\n",smallSizeFile,(int32_t)smallFileSize);
+    if (bigFileSize >= smallFileSize)
+    {
+        return 0;
+    }
+
+    return 1;
+}
+
